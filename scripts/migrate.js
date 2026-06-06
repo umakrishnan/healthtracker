@@ -33,9 +33,12 @@ async function migrate() {
       date TEXT NOT NULL,
       activity TEXT NOT NULL,
       completed BOOLEAN DEFAULT FALSE,
+      count INTEGER DEFAULT 1,
       created_at TIMESTAMPTZ DEFAULT NOW(),
       UNIQUE(date, activity)
     );
+    -- Add count column if upgrading from earlier schema
+    ALTER TABLE activity_log ADD COLUMN IF NOT EXISTS count INTEGER DEFAULT 1;
     CREATE TABLE IF NOT EXISTS back_checkin (
       id SERIAL PRIMARY KEY,
       date TEXT NOT NULL,

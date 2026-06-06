@@ -12,13 +12,13 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const { date, activity, completed } = await req.json()
+  const { date, activity, completed, count } = await req.json()
   const { rows } = await pool.query(
-    `INSERT INTO activity_log (date, activity, completed)
-     VALUES ($1, $2, $3)
-     ON CONFLICT (date, activity) DO UPDATE SET completed = $3
+    `INSERT INTO activity_log (date, activity, completed, count)
+     VALUES ($1, $2, $3, $4)
+     ON CONFLICT (date, activity) DO UPDATE SET completed = $3, count = $4
      RETURNING *`,
-    [date, activity, completed]
+    [date, activity, completed, count ?? 1]
   )
   return NextResponse.json(rows[0])
 }
