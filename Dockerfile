@@ -15,7 +15,6 @@ COPY . .
 
 # Railway injects DATABASE_URL at build time via environment
 # We set the provider for Railway (postgresql)
-ENV DATABASE_PROVIDER=postgresql
 RUN npx prisma generate
 RUN npm run build
 
@@ -24,7 +23,6 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 ENV PORT=3000
-ENV DATABASE_PROVIDER=postgresql
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs

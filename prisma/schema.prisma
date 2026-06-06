@@ -3,9 +3,7 @@ generator client {
 }
 
 datasource db {
-  // SQLite for local dev, postgresql for Railway.
-  // Set DATABASE_URL in .env: "file:./dev.db" (local) or postgres:// (Railway).
-  provider = env("DATABASE_PROVIDER")
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
