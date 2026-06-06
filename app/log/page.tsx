@@ -168,39 +168,64 @@ export default function LogPage() {
             }}>
               {a.mode === 'minutes' ? (
                 <>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
-                    <button
-                      onClick={() => setCount(a.id, (counts[a.id] ?? 0) - 5)}
-                      disabled={!counts[a.id]}
-                      style={{
-                        width: 28, height: 28, borderRadius: 8,
-                        border: '1.5px solid var(--line)', background: 'var(--warm)',
-                        fontSize: 15, cursor: counts[a.id] ? 'pointer' : 'not-allowed',
-                        opacity: counts[a.id] ? 1 : 0.35,
-                        display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--muted)',
-                      }}
-                    >−</button>
-                    <div style={{
-                      width: 48, textAlign: 'center',
-                      fontFamily: 'Playfair Display, serif', fontSize: 16, fontWeight: 600,
-                      color: counts[a.id] ? 'var(--clay)' : 'var(--light)',
-                      lineHeight: 1,
-                    }}>
-                      {counts[a.id] ? `${counts[a.id]}m` : '—'}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8, flex: 1 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <span className={`pill pill-${a.type}`} style={{ opacity: counts[a.id] ? 1 : 0.7 }}>{a.label}</span>
+                      {a.note && <span style={{ fontSize: 10, color: 'var(--muted)' }}>{a.note}</span>}
                     </div>
-                    <button
-                      onClick={() => setCount(a.id, (counts[a.id] ?? 0) + 5)}
-                      style={{
-                        width: 28, height: 28, borderRadius: 8,
-                        border: '1.5px solid var(--clay)', background: 'var(--clay-soft)',
-                        fontSize: 15, cursor: 'pointer', color: 'var(--clay)',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      }}
-                    >+</button>
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <span className={`pill pill-${a.type}`} style={{ opacity: counts[a.id] ? 1 : 0.6 }}>{a.label}</span>
-                    {a.note && <div style={{ fontSize: 10, color: 'var(--muted)', marginTop: 3 }}>{a.note}</div>}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <button
+                        onClick={() => setCount(a.id, Math.max(0, (counts[a.id] ?? 0) - 5))}
+                        disabled={!counts[a.id]}
+                        style={{
+                          width: 32, height: 32, borderRadius: 8, flexShrink: 0,
+                          border: '1.5px solid var(--line)', background: 'var(--warm)',
+                          fontSize: 16, cursor: counts[a.id] ? 'pointer' : 'not-allowed',
+                          opacity: counts[a.id] ? 1 : 0.35,
+                          display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--muted)',
+                        }}
+                      >−</button>
+                      <div style={{ position: 'relative', flex: 1 }}>
+                        <input
+                          type="number"
+                          min={0}
+                          max={300}
+                          value={counts[a.id] || ''}
+                          placeholder="0"
+                          onChange={e => {
+                            const v = parseInt(e.target.value, 10)
+                            setCount(a.id, isNaN(v) ? 0 : Math.max(0, Math.min(300, v)))
+                          }}
+                          style={{
+                            width: '100%',
+                            padding: '7px 28px 7px 10px',
+                            fontFamily: 'Playfair Display, serif',
+                            fontSize: 16, fontWeight: 600,
+                            color: counts[a.id] ? 'var(--clay)' : 'var(--light)',
+                            background: 'var(--warm)',
+                            border: `1.5px solid ${counts[a.id] ? 'var(--clay)' : 'var(--line)'}`,
+                            borderRadius: 9,
+                            outline: 'none',
+                            textAlign: 'center',
+                            boxSizing: 'border-box',
+                          }}
+                        />
+                        <span style={{
+                          position: 'absolute', right: 9, top: '50%', transform: 'translateY(-50%)',
+                          fontSize: 11, fontWeight: 600, color: 'var(--muted)',
+                          fontFamily: 'Outfit, sans-serif', pointerEvents: 'none',
+                        }}>min</span>
+                      </div>
+                      <button
+                        onClick={() => setCount(a.id, (counts[a.id] ?? 0) + 5)}
+                        style={{
+                          width: 32, height: 32, borderRadius: 8, flexShrink: 0,
+                          border: '1.5px solid var(--clay)', background: 'var(--clay-soft)',
+                          fontSize: 16, cursor: 'pointer', color: 'var(--clay)',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        }}
+                      >+</button>
+                    </div>
                   </div>
                 </>
               ) : a.mode === 'checkbox' ? (

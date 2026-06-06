@@ -84,9 +84,10 @@ The start command (`node scripts/migrate.js && npm start`) runs `CREATE TABLE IF
 
 ## Security
 
-- Password-protected via HTTP Basic Auth (`middleware.ts`)
+- Password-protected via a custom styled login page (no browser popups)
 - Set `BASIC_AUTH_PASSWORD` in Railway Variables to enable
 - When not set (local dev), auth is skipped
+- Session stored in an `httpOnly` cookie — lasts 30 days
 - `DATABASE_URL` is server-side only — never exposed to the browser
 
 ## Project Structure

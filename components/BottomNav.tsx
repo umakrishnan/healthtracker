@@ -14,6 +14,7 @@ const nav = [
 
 export default function BottomNav() {
   const path = usePathname()
+  if (path === '/login') return null
   return (
     <nav className="bottom-nav">
       {nav.map(({ href, icon, label }) => (
