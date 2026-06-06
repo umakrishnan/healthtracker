@@ -6,17 +6,18 @@ type ActivityDef = {
   id: string
   label: string
   type: string
-  mode: 'counter' | 'checkbox'
+  mode: 'minutes' | 'checkbox'
   note?: string
 }
 
 const ACTIVITIES: ActivityDef[] = [
-  { id: 'walk_easy',     label: '🚶 Easy Walk',       type: 'walk',    mode: 'counter', note: '45 min steady pace' },
-  { id: 'walk_interval', label: '🚶⚡ Interval Walk', type: 'walk',    mode: 'counter', note: 'Brisk/easy intervals' },
-  { id: 'pt',            label: '◆ PT Session',        type: 'pt',      mode: 'checkbox' },
-  { id: 'pilates',       label: '✦ Pilates',           type: 'pilates', mode: 'checkbox' },
-  { id: 'yoga',          label: '🌿 Yoga',             type: 'yoga',    mode: 'checkbox' },
-  { id: 'swim_lesson',   label: '🏊 Swim Lesson',      type: 'swim',    mode: 'checkbox', note: '30 min with coach' },
+  { id: 'walk_easy',     label: '🚶 Flat Walk',        type: 'walk',    mode: 'minutes', note: 'Flat route, steady pace' },
+  { id: 'walk_hilly',    label: '🚶⛰️ Hilly Walk',    type: 'walk',    mode: 'minutes', note: 'Half flat, half uphill' },
+  { id: 'walk_interval', label: '🚶⚡ Interval Walk',  type: 'walk',    mode: 'minutes', note: 'Brisk/easy intervals' },
+  { id: 'pt',            label: '◆ PT Session',         type: 'pt',      mode: 'checkbox' },
+  { id: 'pilates',       label: '✦ Pilates',            type: 'pilates', mode: 'checkbox' },
+  { id: 'yoga',          label: '🌿 Yoga',              type: 'yoga',    mode: 'checkbox' },
+  { id: 'swim_lesson',   label: '🏊 Swim Lesson',       type: 'swim',    mode: 'checkbox', note: '30 min with coach' },
 ]
 
 function toISOLocal(d = new Date()) { return d.toISOString().slice(0, 10) }
@@ -165,7 +166,44 @@ export default function LogPage() {
               display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px',
               borderBottom: i < ACTIVITIES.length - 1 ? '1px solid var(--line)' : 'none',
             }}>
-              {a.mode === 'checkbox' ? (
+              {a.mode === 'minutes' ? (
+                <>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+                    <button
+                      onClick={() => setCount(a.id, (counts[a.id] ?? 0) - 5)}
+                      disabled={!counts[a.id]}
+                      style={{
+                        width: 28, height: 28, borderRadius: 8,
+                        border: '1.5px solid var(--line)', background: 'var(--warm)',
+                        fontSize: 15, cursor: counts[a.id] ? 'pointer' : 'not-allowed',
+                        opacity: counts[a.id] ? 1 : 0.35,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--muted)',
+                      }}
+                    >−</button>
+                    <div style={{
+                      width: 48, textAlign: 'center',
+                      fontFamily: 'Playfair Display, serif', fontSize: 16, fontWeight: 600,
+                      color: counts[a.id] ? 'var(--clay)' : 'var(--light)',
+                      lineHeight: 1,
+                    }}>
+                      {counts[a.id] ? `${counts[a.id]}m` : '—'}
+                    </div>
+                    <button
+                      onClick={() => setCount(a.id, (counts[a.id] ?? 0) + 5)}
+                      style={{
+                        width: 28, height: 28, borderRadius: 8,
+                        border: '1.5px solid var(--clay)', background: 'var(--clay-soft)',
+                        fontSize: 15, cursor: 'pointer', color: 'var(--clay)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      }}
+                    >+</button>
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <span className={`pill pill-${a.type}`} style={{ opacity: counts[a.id] ? 1 : 0.6 }}>{a.label}</span>
+                    {a.note && <div style={{ fontSize: 10, color: 'var(--muted)', marginTop: 3 }}>{a.note}</div>}
+                  </div>
+                </>
+              ) : a.mode === 'checkbox' ? (
                 <>
                   <button
                     onClick={() => toggle(a.id)}
