@@ -1,0 +1,48 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  // SQLite for local dev, postgresql for Railway.
+  // Set DATABASE_URL in .env: "file:./dev.db" (local) or postgres:// (Railway).
+  provider = env("DATABASE_PROVIDER")
+  url      = env("DATABASE_URL")
+}
+
+model FoodLog {
+  id        Int      @id @default(autoincrement())
+  date      String   // ISO date string YYYY-MM-DD
+  rating    String   // "green" | "yellow" | "red"
+  notes     String?
+  createdAt DateTime @default(now())
+
+  @@unique([date])
+}
+
+model SleepLog {
+  id        Int      @id @default(autoincrement())
+  date      String   // ISO date string YYYY-MM-DD
+  hours     Float
+  createdAt DateTime @default(now())
+
+  @@unique([date])
+}
+
+model ActivityLog {
+  id           Int      @id @default(autoincrement())
+  date         String   // ISO date string YYYY-MM-DD
+  activity     String   // "walk" | "pt" | "pilates" | "yoga" | "swim"
+  completed    Boolean  @default(false)
+  createdAt    DateTime @default(now())
+
+  @@unique([date, activity])
+}
+
+model BackCheckin {
+  id        Int      @id @default(autoincrement())
+  date      String   // ISO date string YYYY-MM-DD
+  status    String   // "better" | "same" | "worse"
+  painLevel Int      // 0-10
+  notes     String?
+  createdAt DateTime @default(now())
+}
