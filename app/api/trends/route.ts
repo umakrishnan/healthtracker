@@ -1,5 +1,7 @@
+export const dynamic = 'force-dynamic'
+
 import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { pool } from '@/lib/db'
 
 function isoWeek(dateStr: string) {
   const d = new Date(dateStr)
@@ -15,63 +17,45 @@ function weekLabel(mondayStr: string) {
 }
 
 export async function GET() {
-  const [sleepLogs, foodLogs, activityLogs, backLogs] = await Promise.all([
-    prisma.sleepLog.findMany({ orderBy: { date: 'asc' } }),
-    prisma.foodLog.findMany({ orderBy: { date: 'asc' } }),
-    prisma.activityLog.findMany({ where: { completed: true }, orderBy: { date: 'asc' } }),
-    prisma.backCheckin.findMany({ orderBy: { date: 'asc' } }),
+  const [sleepRes, foodRes, actRes, backRes] = await Promise.all([
+    pool.query('SELECT date, hours FROM sleep_log ORDER BY date ASC'),
+    pool.query('SELECT date, rating FROM food_log ORDER BY date ASC'),
+    pool.query('SELECT date FROM activity_log WHERE completed = true ORDER BY date ASC'),
+    pool.query('SELECT date, pain_level, status FROM back_checkin ORDER BY date ASC'),
   ])
 
-  // Group by week (Monday-keyed)
   const weeks = new Map<string, {
     sleep: number[]
     food: { green: number; yellow: number; red: number }
-    activities: number
+    actDays: Set<string>
     backPain: number[]
     backStatus: string[]
   }>()
 
   function ensureWeek(w: string) {
     if (!weeks.has(w)) {
-      weeks.set(w, { sleep: [], food: { green: 0, yellow: 0, red: 0 }, activities: 0, backPain: [], backStatus: [] })
+      weeks.set(w, { sleep: [], food: { green: 0, yellow: 0, red: 0 }, actDays: new Set(), backPain: [], backStatus: [] })
     }
     return weeks.get(w)!
   }
 
-  for (const l of sleepLogs) {
-    const w = isoWeek(l.date)
-    ensureWeek(w).sleep.push(l.hours)
+  for (const r of sleepRes.rows) ensureWeek(isoWeek(r.date)).sleep.push(r.hours)
+
+  for (const r of foodRes.rows) {
+    const f = ensureWeek(isoWeek(r.date)).food
+    if (r.rating === 'green') f.green++
+    else if (r.rating === 'yellow') f.yellow++
+    else f.red++
   }
 
-  for (const l of foodLogs) {
-    const w = isoWeek(l.date)
-    const bucket = ensureWeek(w).food
-    if (l.rating === 'green') bucket.green++
-    else if (l.rating === 'yellow') bucket.yellow++
-    else bucket.red++
+  for (const r of actRes.rows) ensureWeek(isoWeek(r.date)).actDays.add(r.date)
+
+  for (const r of backRes.rows) {
+    ensureWeek(isoWeek(r.date)).backPain.push(r.pain_level)
+    ensureWeek(isoWeek(r.date)).backStatus.push(r.status)
   }
 
-  // Count unique active days per week
-  const actDaysByWeek = new Map<string, Set<string>>()
-  for (const l of activityLogs) {
-    const w = isoWeek(l.date)
-    if (!actDaysByWeek.has(w)) actDaysByWeek.set(w, new Set())
-    actDaysByWeek.get(w)!.add(l.date)
-    ensureWeek(w) // ensure entry exists
-  }
-  for (const [w, days] of actDaysByWeek) {
-    weeks.get(w)!.activities = days.size
-  }
-
-  for (const l of backLogs) {
-    const w = isoWeek(l.date)
-    ensureWeek(w).backPain.push(l.painLevel)
-    ensureWeek(w).backStatus.push(l.status)
-  }
-
-  const sorted = [...weeks.keys()].sort()
-
-  const result = sorted.map(w => {
+  const result = [...weeks.keys()].sort().map(w => {
     const d = weeks.get(w)!
     const avgSleep = d.sleep.length ? +(d.sleep.reduce((a, b) => a + b, 0) / d.sleep.length).toFixed(1) : null
     const avgPain = d.backPain.length ? +(d.backPain.reduce((a, b) => a + b, 0) / d.backPain.length).toFixed(1) : null
@@ -86,7 +70,7 @@ export async function GET() {
       label: weekLabel(w),
       avgSleep,
       food: totalFood ? d.food : null,
-      activeDays: d.activities || 0,
+      activeDays: d.actDays.size,
       avgPain,
       backTrend: trend,
     }
