@@ -11,13 +11,12 @@ type ActivityDef = {
 }
 
 const ACTIVITIES: ActivityDef[] = [
-  { id: 'walk_easy',     label: '🚶 Easy Walk',         type: 'walk',    mode: 'counter', note: '45 min steady pace' },
-  { id: 'walk_interval', label: '🚶⚡ Interval Walk',   type: 'walk',    mode: 'counter', note: 'Brisk/easy intervals' },
-  { id: 'pt',            label: '◆ PT Session',          type: 'pt',      mode: 'checkbox' },
-  { id: 'pilates',       label: '✦ Pilates',             type: 'pilates', mode: 'checkbox' },
-  { id: 'yoga',          label: '🌿 Yoga',               type: 'yoga',    mode: 'checkbox' },
-  { id: 'swim_easy',     label: '🏊 Easy Swim',          type: 'swim',    mode: 'counter', note: '30 min relaxed' },
-  { id: 'swim_interval', label: '🏊⚡ Interval Swim',   type: 'swim',    mode: 'counter', note: 'Structured sets' },
+  { id: 'walk_easy',     label: '🚶 Easy Walk',       type: 'walk',    mode: 'counter', note: '45 min steady pace' },
+  { id: 'walk_interval', label: '🚶⚡ Interval Walk', type: 'walk',    mode: 'counter', note: 'Brisk/easy intervals' },
+  { id: 'pt',            label: '◆ PT Session',        type: 'pt',      mode: 'checkbox' },
+  { id: 'pilates',       label: '✦ Pilates',           type: 'pilates', mode: 'checkbox' },
+  { id: 'yoga',          label: '🌿 Yoga',             type: 'yoga',    mode: 'checkbox' },
+  { id: 'swim_lesson',   label: '🏊 Swim Lesson',      type: 'swim',    mode: 'checkbox', note: '30 min with coach' },
 ]
 
 function toISOLocal(d = new Date()) { return d.toISOString().slice(0, 10) }
